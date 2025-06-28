@@ -4,23 +4,26 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>UniFECAF - Portal do Aluno</title>
-   
+    <!-- Importação da fonte Inter do Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    
+    <!-- Font Awesome para ícones -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <!-- Inclui Tailwind CSS via CDN (necessário para os estilos de gamificação inline) -->
+    <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="static/estilo.css" />
 </head>
 <body>
     <div class="container">
         <header>
             <div class="logo">
-                <img src="../images/logo_2.jpg" alt="UniFECAF Digital logo" />
+                <!-- Caminho da imagem da logo corrigido para static/image/ -->
+                <img src="static/images/logo_2.jpg" alt="UniFECAF Digital logo" />
             </div>
             <h1 class="course-title">Análise e Desenvolvimento de Sistemas</h1>
         </header>
 
         <main class="main-content">
-           
+            <!-- Barra Lateral Esquerda: Grupos, Feroz e Acessibilidade -->
             <aside class="sidebar">
                 <button id="openGroupsModalBtn" class="sidebar-button" aria-label="Abrir modal de grupos de estudo">
                     <i class="fas fa-hand-fist"></i> Grupos de Estudo
@@ -28,7 +31,8 @@
                 
                 <div class="tutor-section card">
                     <div class="tutor-card">
-                        <img src="../images/feroz.png" alt="Feroz - Tutor inteligente" class="tutor-image" id="ferozImage" />
+                        <!-- Caminho da imagem do Feroz corrigido para static/image/ -->
+                        <img src="static/images/feroz.png" alt="Feroz - Tutor inteligente" class="tutor-image" id="ferozImage" />
                         <h2>Feroz</h2>
                         <p>Tutor Inteligente</p>
                     </div>
@@ -57,7 +61,7 @@
                 </div>
             </aside>
 
-            <!-- Área de Conteúdo Principal: Progresso e Análise -->
+            <!-- Área de Conteúdo Principal: Progresso, Análise e Gamificação -->
             <section class="content-area">
                 <!-- Seção de Progresso do Aluno -->
                 <div class="progress-section card">
@@ -102,6 +106,46 @@
                     <div class="level-info">
                         <div class="level-circle">5</div>
                         <p class="level-text">Nível Atual: Mestre Aprendiz</p>
+                    </div>
+                </div>
+
+                <!-- Nova Seção de Gamificação com XP e Corações -->
+                <div class="gamification-section card">
+                    <h2 class="section-title"><i class="fas fa-gamepad"></i> Seu Desafio Feroz</h2>
+                    <div class="mb-6 bg-blue-50 p-4 rounded-xl shadow-inner border border-blue-200">
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="text-lg font-bold text-gray-700">Nível: <span id="levelDisplay" class="text-blue-600">1</span></span>
+                            <span class="text-lg font-bold text-gray-700">XP: <span id="xpDisplay" class="text-green-600">0</span> / <span id="xpToNextLevelDisplay" class="text-green-600">100</span></span>
+                        </div>
+                        <div class="xp-bar-container">
+                            <div id="xpProgressBar" class="xp-bar-fill" style="width: 0%;"></div>
+                        </div>
+                    </div>
+
+                    <!-- Seção de Corações -->
+                    <div class="mb-8 bg-red-50 p-4 rounded-xl shadow-inner border border-red-200">
+                        <h2 class="text-lg font-bold text-gray-700 mb-2">Corações:</h2>
+                        <div id="heartsDisplay" class="text-red-500 text-4xl flex justify-center space-x-2">
+                            <!-- Corações serão renderizados aqui pelo JS -->
+                        </div>
+                    </div>
+
+                    <!-- Mensagem de Game Over (oculta por padrão) -->
+                    <div id="gameOverMessage" class="hidden text-red-600 font-bold text-2xl mt-4 animate-bounce">
+                        Game Over! Tente novamente.
+                    </div>
+
+                    <!-- Botões de Ação de Gamificação -->
+                    <div class="flex flex-col space-y-4">
+                        <button id="gainXpButton" class="action-button bg-gradient-to-r from-blue-500 to-blue-600 text-white hover:from-blue-600 hover:to-blue-700 active:shadow-inner px-6 py-3 rounded-xl shadow-lg transition-all duration-300 ease-in-out font-semibold">
+                            Ganhar XP (Tarefa Concluída)
+                        </button>
+                        <button id="loseHeartButton" class="action-button bg-gradient-to-r from-red-500 to-red-600 text-white hover:from-red-600 hover:to-red-700 active:shadow-inner px-6 py-3 rounded-xl shadow-lg transition-all duration-300 ease-in-out font-semibold">
+                            Perder Coração (Erro na Questão)
+                        </button>
+                        <button id="resetButton" class="action-button bg-gradient-to-r from-gray-400 to-gray-500 text-white hover:from-gray-500 hover:to-gray-600 active:shadow-inner px-6 py-3 rounded-xl shadow-lg transition-all duration-300 ease-in-out font-semibold">
+                            Reiniciar Jogo
+                        </button>
                     </div>
                 </div>
 

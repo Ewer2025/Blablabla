@@ -23,7 +23,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const toggleContrastBtn = document.getElementById('toggleContrastBtn');
     const toggleGrayscaleBtn = document.getElementById('toggleGrayscaleBtn');
     const toggleAudioDescriptionBtn = document.getElementById('toggleAudioDescriptionBtn');
-    const audioDescriptionPlayer = document.getElementById('audioDescriptionPlayer');
+    const audioDescriptionPlayer = document.getElementById('audioDescriptionPlayer'); // Elemento de áudio, mantido mas não usado diretamente aqui
 
     // --- Elementos de Upload de Vídeo no Chat ---
     const videoUploadInput = document.getElementById('videoUploadInput');
@@ -31,10 +31,31 @@ document.addEventListener('DOMContentLoaded', () => {
     const fileUploadPreview = document.getElementById('fileUploadPreview');
     const cancelUploadBtn = document.getElementById('cancelUploadBtn');
 
+    // --- Variáveis Globais de Estado do Jogo (Gamificação) ---
+    let currentXP = 0; // XP atual do jogador
+    let level = 1;     // Nível atual do jogador
+    let xpToNextLevel = 100; // XP necessário para o próximo nível
+    let currentHearts = 3;   // Corações atuais do jogador
+    const maxHearts = 3;     // Máximo de corações que o jogador pode ter
+    let isGameOver = false;  // Indica se o jogo acabou
+
+    // --- Elementos do DOM da Gamificação ---
+    const levelDisplay = document.getElementById('levelDisplay');
+    const xpDisplay = document.getElementById('xpDisplay');
+    const xpToNextLevelDisplay = document.getElementById('xpToNextLevelDisplay');
+    const xpProgressBar = document.getElementById('xpProgressBar');
+    const heartsDisplay = document.getElementById('heartsDisplay');
+    const gameOverMessage = document.getElementById('gameOverMessage');
+    const gainXpButton = document.getElementById('gainXpButton');
+    const loseHeartButton = document.getElementById('loseHeartButton');
+    const resetButton = document.getElementById('resetButton');
+
+    // --- Variáveis de Acessibilidade/Chat ---
     let chatHistory = [];
     let currentFontSize = 16; // Base font size in pixels (corresponds to 1rem)
     const FONT_SIZE_STEP = 2; // Step for font size adjustment
     let audioDescriptionEnabled = false;
+    let selectedFile = null; // To store the file object for upload
 
     // --- Funções Auxiliares de Acessibilidade ---
     function speak(text) {
@@ -73,11 +94,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Efeito de Abertura do Feroz (animação complexa)
     ferozImage.addEventListener('click', () => {
-        // Apply CSS class for animation
         ferozImage.classList.add('feroz-animation');
         speak("Feroz, o tutor inteligente, está abrindo o chat para você. Preparando a análise de apresentações!");
 
-        // The chat overlay opens after the Feroz animation completes
         setTimeout(() => {
             ferozImage.classList.remove('feroz-animation');
             chatOverlay.classList.add('visible');
@@ -111,51 +130,77 @@ document.addEventListener('DOMContentLoaded', () => {
     messageForm.addEventListener('submit', async (e) => {
         e.preventDefault();
 
-        const userMessage = userInput.value.trim();
-        if (userMessage === '') return;
+        if (selectedFile) {
+            // Handle video analysis
+            const videoFileName = selectedFile.name;
+            addMessageToUI(`Estou enviando meu vídeo "${videoFileName}" para análise!`, 'user');
+            chatHistory.push({ role: "user", content: `Vídeo para análise: ${videoFileName}` });
+            resetFileUpload(); // Clear selected file after "sending"
 
-        addMessageToUI(userMessage, 'user');
-        chatHistory.push({ role: "user", content: userMessage });
-        userInput.value = '';
+            sendMessageBtn.disabled = true;
+            loadingIndicator.style.display = 'inline-block';
+            speak(`Feroz está analisando o vídeo ${videoFileName}. Por favor, aguarde.`);
 
-        sendMessageBtn.disabled = true;
-        loadingIndicator.style.display = 'inline-block';
-        speak("Enviando mensagem...");
+            // Simulate AI analysis and response
+            setTimeout(() => {
+                const analysisResponse = `Olá! Analisei seu vídeo "${videoFileName}". Percebi que sua introdução foi muito cativante! Para aprimorar, talvez tente variar o tom de voz em pontos chave para manter o público ainda mais engajado. No geral, um ótimo trabalho!`;
+                addMessageToUI(analysisResponse, 'ai');
+                chatHistory.push({ role: "ai", content: analysisResponse });
+                sendMessageBtn.disabled = false;
+                loadingIndicator.style.display = 'none';
+                speak("Análise do vídeo concluída.");
+                // Simular ganho de XP após a análise do vídeo (exemplo)
+                gainXP(50);
+            }, 3000); // Simulate 3 seconds of analysis
+        } else {
+            // Handle regular text message
+            const userMessage = userInput.value.trim();
+            if (userMessage === '') return;
 
-        try {
-            // Adapt this URL if your Flask is on a different port
-            const backendResponse = await fetch("/api/perguntar", { 
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ 
-                    pergunta: userMessage, 
-                    user_id: "meu_usuario_demonstracao", 
-                    chat_history: chatHistory 
-                }),
-            });
+            addMessageToUI(userMessage, 'user');
+            chatHistory.push({ role: "user", content: userMessage });
+            userInput.value = '';
 
-            if (!backendResponse.ok) {
-                const errorData = await backendResponse.json();
-                throw new Error(errorData.erro || 'Erro na resposta do backend');
+            sendMessageBtn.disabled = true;
+            loadingIndicator.style.display = 'inline-block';
+            speak("Enviando mensagem...");
+
+            try {
+                const backendResponse = await fetch("/api/perguntar", { 
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ 
+                        pergunta: userMessage, 
+                        user_id: "meu_usuario_demonstracao", 
+                        chat_history: chatHistory 
+                    }),
+                });
+
+                if (!backendResponse.ok) {
+                    const errorData = await backendResponse.json();
+                    throw new Error(errorData.erro || 'Erro na resposta do backend');
+                }
+
+                const data = await backendResponse.json();
+                const aiResponse = data.resposta;
+
+                addMessageToUI(aiResponse, 'ai');
+                chatHistory.push({ role: "ai", content: aiResponse });
+
+            } catch (error) {
+                console.error("Erro ao enviar mensagem ou obter resposta da IA:", error);
+                addMessageToUI("Desculpe, houve um erro ao processar sua solicitação. Tente novamente mais tarde.", "ai");
+                showMessage("Erro: " + error.message, "error");
+                chatHistory.push({ role: "ai", content: "Desculpe, houve um erro ao processar sua solicitação. Tente novamente mais tarde." });
+            } finally {
+                sendMessageBtn.disabled = false;
+                loadingIndicator.style.display = 'none';
+                speak("Mensagem enviada.");
+                // Simular ganho de XP após uma interação de chat (exemplo)
+                gainXP(10);
             }
-
-            const data = await backendResponse.json();
-            const aiResponse = data.resposta;
-
-            addMessageToUI(aiResponse, 'ai');
-            chatHistory.push({ role: "ai", content: aiResponse });
-
-        } catch (error) {
-            console.error("Erro ao enviar mensagem ou obter resposta da IA:", error);
-            addMessageToUI("Desculpe, houve um erro ao processar sua solicitação. Tente novamente mais tarde.", "ai");
-            showMessage("Erro: " + error.message, "error");
-            chatHistory.push({ role: "ai", content: "Desculpe, houve um erro ao processar sua solicitação. Tente novamente mais tarde." });
-        } finally {
-            sendMessageBtn.disabled = false;
-            loadingIndicator.style.display = 'none';
-            speak("Mensagem enviada.");
         }
     });
 
@@ -213,6 +258,8 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // --- Animação das Barras de Progresso (Efeito de Preenchimento com XP) ---
+    // Esta seção é para as barras de progresso ESTÁTICAS na interface principal.
+    // O XP e os corações são um sistema de gamificação SEPARADO e dinâmico.
     const progressBarElements = document.querySelectorAll('.progress-bar');
     progressBarElements.forEach(bar => {
         const progress = bar.dataset.progress; 
@@ -235,17 +282,16 @@ document.addEventListener('DOMContentLoaded', () => {
                         bar.textContent = `${currentTextProgress}%`;
                     } else {
                         clearInterval(textInterval);
-                        // XP Gain animation after the bar fills
                         xpPopup.textContent = `+${xpGain} XP!`;
                         xpPopup.style.opacity = '1';
-                        xpPopup.style.transform = 'translateY(0) scale(1.1)'; // Rises and zooms slightly
-                        xpPopup.classList.add('xp-animation'); // Activates CSS animation
+                        xpPopup.style.transform = 'translateY(0) scale(1.1)';
+                        xpPopup.classList.add('xp-animation');
                         
                         setTimeout(() => {
                             xpPopup.classList.remove('xp-animation');
-                            xpPopup.style.opacity = '0'; // Hides the popup
-                            xpPopup.style.transform = 'translateY(-20px)'; // Moves up again
-                        }, 1500); // Duration of the popup animation
+                            xpPopup.style.opacity = '0';
+                            xpPopup.style.transform = 'translateY(-20px)';
+                        }, 1500);
                     }
                 }, 1000 / progress); 
             }, 300);
@@ -254,14 +300,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Level circle animation
     const levelCircle = document.querySelector('.level-circle');
-    levelCircle.style.transform = 'scale(0.8)';
-    levelCircle.style.opacity = '0';
-    setTimeout(() => {
-        levelCircle.style.transition = 'transform 0.5s cubic-bezier(0.68, -0.55, 0.27, 1.55), opacity 0.5s ease-out';
-        levelCircle.style.transform = 'scale(1)';
-        levelCircle.style.opacity = '1';
-        speak(`Seu nível atual é ${levelCircle.textContent}.`);
-    }, 300);
+    if (levelCircle) { // Verifica se o elemento existe
+        levelCircle.style.transform = 'scale(0.8)';
+        levelCircle.style.opacity = '0';
+        setTimeout(() => {
+            levelCircle.style.transition = 'transform 0.5s cubic-bezier(0.68, -0.55, 0.27, 1.55), opacity 0.5s ease-out';
+            levelCircle.style.transform = 'scale(1)';
+            levelCircle.style.opacity = '1';
+            speak(`Seu nível atual é ${levelCircle.textContent}.`);
+        }, 300);
+    }
 
     // Group join button effect (example)
     const joinGroupButtons = document.querySelectorAll('.join-group-btn');
@@ -337,8 +385,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // --- Funções de Upload de Vídeo no Chat ---
-    let selectedFile = null; // To store the file object
-
     videoUploadInput.addEventListener('change', (event) => {
         selectedFile = event.target.files[0];
         if (selectedFile) {
@@ -370,83 +416,134 @@ document.addEventListener('DOMContentLoaded', () => {
         sendMessageBtn.textContent = 'Enviar';
     }
 
-    // Modify the messageForm submit to handle video analysis
-    messageForm.removeEventListener('submit', async (e) => {}); // Remove previous listener
-    messageForm.addEventListener('submit', async (e) => {
-        e.preventDefault();
+    // --- Funções do Sistema de Gamificação (XP e Corações) ---
 
-        if (selectedFile) {
-            // Handle video analysis
-            const videoFileName = selectedFile.name;
-            addMessageToUI(`Estou enviando meu vídeo "${videoFileName}" para análise!`, 'user');
-            chatHistory.push({ role: "user", content: `Vídeo para análise: ${videoFileName}` });
-            resetFileUpload(); // Clear selected file after "sending"
+    /**
+     * Atualiza a exibição de XP, nível e barra de progresso.
+     * Deve ser chamada sempre que `currentXP`, `level` ou `xpToNextLevel` mudarem.
+     */
+    function updateXPDisplay() {
+        // Verifica se os elementos existem antes de tentar acessá-los
+        if (levelDisplay && xpDisplay && xpToNextLevelDisplay && xpProgressBar) {
+            levelDisplay.textContent = level;
+            xpDisplay.textContent = currentXP;
+            xpToNextLevelDisplay.textContent = xpToNextLevel;
 
-            sendMessageBtn.disabled = true;
-            loadingIndicator.style.display = 'inline-block';
-            speak(`Feroz está analisando o vídeo ${videoFileName}. Por favor, aguarde.`);
+            const progressPercentage = (currentXP / xpToNextLevel) * 100;
+            xpProgressBar.style.width = `${progressPercentage}%`;
+        }
+    }
 
-            // Simulate AI analysis and response
-            setTimeout(() => {
-                const analysisResponse = `Olá! Analisei seu vídeo "${videoFileName}". Percebi que sua introdução foi muito cativante! Para aprimorar, talvez tente variar o tom de voz em pontos chave para manter o público ainda mais engajado. No geral, um ótimo trabalho!`;
-                addMessageToUI(analysisResponse, 'ai');
-                chatHistory.push({ role: "ai", content: analysisResponse });
-                sendMessageBtn.disabled = false;
-                loadingIndicator.style.display = 'none';
-                speak("Análise do vídeo concluída.");
-            }, 3000); // Simulate 3 seconds of analysis
-        } else {
-            // Handle regular text message
-            const userMessage = userInput.value.trim();
-            if (userMessage === '') return;
-
-            addMessageToUI(userMessage, 'user');
-            chatHistory.push({ role: "user", content: userMessage });
-            userInput.value = '';
-
-            sendMessageBtn.disabled = true;
-            loadingIndicator.style.display = 'inline-block';
-            speak("Enviando mensagem...");
-
-            try {
-                const backendResponse = await fetch("/api/perguntar", { 
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ 
-                        pergunta: userMessage, 
-                        user_id: "meu_usuario_demonstracao", 
-                        chat_history: chatHistory 
-                    }),
-                });
-
-                if (!backendResponse.ok) {
-                    const errorData = await backendResponse.json();
-                    throw new Error(errorData.erro || 'Erro na resposta do backend');
+    /**
+     * Atualiza a exibição dos corações.
+     * Renderiza ícones de coração cheios e vazios.
+     * Deve ser chamada sempre que `currentHearts` mudar.
+     */
+    function updateHeartsDisplay() {
+        if (heartsDisplay) { // Verifica se o elemento existe
+            heartsDisplay.innerHTML = ''; // Limpa a exibição atual
+            for (let i = 0; i < maxHearts; i++) {
+                const heartIcon = document.createElement('i');
+                if (i < currentHearts) {
+                    heartIcon.classList.add('fas', 'fa-heart', 'text-red-500'); // Coração sólido
+                } else {
+                    heartIcon.classList.add('far', 'fa-heart', 'text-gray-300'); // Coração vazio
                 }
-
-                const data = await backendResponse.json();
-                const aiResponse = data.resposta;
-
-                addMessageToUI(aiResponse, 'ai');
-                chatHistory.push({ role: "ai", content: aiResponse });
-
-            } catch (error) {
-                console.error("Erro ao enviar mensagem ou obter resposta da IA:", error);
-                addMessageToUI("Desculpe, houve um erro ao processar sua solicitação. Tente novamente mais tarde.", "ai");
-                showMessage("Erro: " + error.message, "error");
-                chatHistory.push({ role: "ai", content: "Desculpe, houve um erro ao processar sua solicitação. Tente novamente mais tarde." });
-            } finally {
-                sendMessageBtn.disabled = false;
-                loadingIndicator.style.display = 'none';
-                speak("Mensagem enviada.");
+                heartsDisplay.appendChild(heartIcon);
             }
         }
-    });
+    }
+
+    /**
+     * Adiciona XP ao jogador.
+     * Verifica se o jogador subiu de nível.
+     * @param {number} amount - A quantidade de XP a ser adicionada.
+     */
+    function gainXP(amount) {
+        if (isGameOver) {
+            speak("Jogo encerrado. Reinicie para ganhar mais XP.");
+            return;
+        }
+
+        currentXP += amount;
+        speak(`Ganhou ${amount} pontos de experiência!`);
+
+        while (currentXP >= xpToNextLevel) {
+            currentXP -= xpToNextLevel;
+            level++;
+            // Aumenta a quantidade de XP necessária para o próximo nível
+            xpToNextLevel = Math.floor(xpToNextLevel * 1.2); // Cada nível requer 20% a mais
+            showMessage(`Parabéns! Você alcançou o Nível ${level}!`, 'success');
+            speak(`Parabéns! Você alcançou o Nível ${level}!`);
+        }
+        updateXPDisplay();
+    }
+
+    /**
+     * Remove um coração do jogador.
+     * Verifica se o jogo acabou.
+     */
+    function loseHeart() {
+        if (isGameOver) {
+            speak("Jogo encerrado. Não é possível perder mais corações.");
+            return;
+        }
+
+        currentHearts--;
+        speak("Você perdeu um coração!");
+        updateHeartsDisplay();
+
+        if (currentHearts <= 0) {
+            isGameOver = true;
+            if (gameOverMessage) { // Verifica se o elemento existe
+                gameOverMessage.classList.remove('hidden');
+                speak("Game Over! Seus corações acabaram. Reinicie o jogo.");
+            }
+            // Desativa botões de ação
+            if (gainXpButton) gainXpButton.disabled = true;
+            if (loseHeartButton) loseHeartButton.disabled = true;
+            showMessage('Game Over! Seus corações acabaram.', 'error');
+        }
+    }
+
+    /**
+     * Reinicia o jogo para os valores iniciais.
+     */
+    function resetGame() {
+        currentXP = 0;
+        level = 1;
+        xpToNextLevel = 100;
+        currentHearts = maxHearts;
+        isGameOver = false;
+
+        updateXPDisplay();
+        updateHeartsDisplay();
+        if (gameOverMessage) {
+            gameOverMessage.classList.add('hidden');
+        }
+        // Reativa botões de ação
+        if (gainXpButton) gainXpButton.disabled = false;
+        if (loseHeartButton) loseHeartButton.disabled = false;
+        showMessage('Jogo Reiniciado!', 'info');
+        speak("O jogo foi reiniciado.");
+    }
+
+    // --- Event Listeners para os Botões de Gamificação ---
+    if (gainXpButton) {
+        gainXpButton.addEventListener('click', () => gainXP(25)); // Ganha 25 XP por clique
+        addAudioDescriptionHover('gainXpButton', 'Botão para ganhar experiência. Clique para simular a conclusão de uma tarefa.');
+    }
+    if (loseHeartButton) {
+        loseHeartButton.addEventListener('click', loseHeart);
+        addAudioDescriptionHover('loseHeartButton', 'Botão para perder um coração. Clique para simular um erro ou desafio não superado.');
+    }
+    if (resetButton) {
+        resetButton.addEventListener('click', resetGame);
+        addAudioDescriptionHover('resetButton', 'Botão para reiniciar o jogo de gamificação.');
+    }
+
 
     // --- Audio Descriptions on Mouseover (Example - Remove or add more as needed) ---
-    // For demonstration only, don't enable too many in a real app to avoid overload.
     const addAudioDescriptionHover = (elementId, text) => {
         const element = document.getElementById(elementId);
         if (element) {
@@ -468,14 +565,22 @@ document.addEventListener('DOMContentLoaded', () => {
     addAudioDescriptionHover('ferozImage', 'Foto do Feroz, o tutor inteligente.');
     addAudioDescriptionHover('openGroupsModalBtn', 'Botão para abrir grupos de estudo.');
     addAudioDescriptionHover('increaseFontBtn', 'Aumentar tamanho da fonte.');
+    addAudioDescriptionHover('decreaseFontBtn', 'Diminuir tamanho da fonte.');
+    addAudioDescriptionHover('toggleContrastBtn', 'Alternar modo de alto contraste.');
+    addAudioDescriptionHover('toggleGrayscaleBtn', 'Alternar modo escala de cinza.');
+    addAudioDescriptionHover('toggleAudioDescriptionBtn', 'Alternar descrição em áudio.');
     addAudioDescriptionHover('videoUploadInput', 'Botão para selecionar arquivo de vídeo para upload.');
     addAudioDescriptionHover('sendMessageBtn', 'Botão para enviar mensagem ou analisar vídeo.');
     addAudioDescriptionHover('cancelUploadBtn', 'Botão para cancelar o upload do vídeo.');
 
-
     // Add audio description for section titles on hover
     document.querySelectorAll('.section-title').forEach(title => {
-        // Use title.textContent to get the actual visible text
         addAudioDescriptionHover(title.id || title.closest('.card').id || `section-title-${title.textContent.replace(/\s+/g, '-')}`, `Seção ${title.textContent}.`);
     });
+
+    // --- Inicialização do Jogo ---
+    // Chama as funções de atualização para garantir que a UI reflita o estado inicial
+    // Ou o estado salvo, se você implementar localStorage mais tarde
+    updateXPDisplay();
+    updateHeartsDisplay();
 });
