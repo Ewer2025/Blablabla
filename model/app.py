@@ -1,7 +1,7 @@
 import os
 from flask import Flask, request, jsonify, render_template
 from flask_cors import CORS
-from model import ask_llm_with_rag, ingest_data_into_chroma
+from modelo import ask_llm_with_rag, ingest_data_into_chroma
 
 # Caminho absoluto para a pasta templates (um nível acima do site.py)
 BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
