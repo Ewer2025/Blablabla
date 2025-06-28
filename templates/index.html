@@ -2,156 +2,223 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>UniFECAF - Portal do Aluno</title>
+   
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link rel="stylesheet" href="static/estilo.css" />
-    <title>Unifecaf</title>
-    <style>
-        /* Estilos do bloco de gamificação */
-        .gamification-container {
-            background: #fff;
-            border-radius: 12px;
-            box-shadow: 0 4px 16px rgb(0 0 0 / 0.1);
-            padding: 24px;
-            margin: 30px auto 0 auto;
-            max-width: 480px;
-            color: #333;
-        }
-        .gamification-container h2 {
-            color: #264653;
-            border-bottom: 2px solid #2a9d8f;
-            padding-bottom: 6px;
-            margin-bottom: 12px;
-        }
-        .level-circle {
-            background: #e0f2f1;
-            border-radius: 50%;
-            width: 100px;
-            height: 100px;
-            margin: 0 auto 20px auto;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 36px;
-            font-weight: bold;
-            color: #00796b;
-            box-shadow: 0 0 15px #00796baa;
-            cursor: default;
-        }
-        .challenge-list {
-            list-style: none;
-            padding-left: 0;
-        }
-        .challenge-list li {
-            background: #f1f9f8;
-            padding: 12px 16px;
-            border-radius: 8px;
-            margin-bottom: 8px;
-            border-left: 6px solid #2a9d8f;
-            font-weight: 600;
-            color: #264653;
-        }
-        .alert-box {
-            background: #ffebe6;
-            border-left: 6px solid #e76f51;
-            padding: 14px 20px;
-            border-radius: 8px;
-            color: #b00020;
-            font-weight: 700;
-            margin-bottom: 8px;
-        }
-    </style>
 </head>
 <body>
     <div class="container">
         <header>
             <div class="logo">
-                <img src="images/logo_2.jpg" alt="UniFECAF Digital logo" />
+                <img src="../images/logo_2.jpg" alt="UniFECAF Digital logo" />
             </div>
             <h1 class="course-title">Análise e Desenvolvimento de Sistemas</h1>
         </header>
+
         <main class="main-content">
-            <aside class="tutor-section">
-                <div class="tutor-card">
-                    <img src="images/feroz-removebg-preview.png" alt="Feroz - Tutor inteligente" class="tutor-image" id="ferozImage" />
-                    <h2>Feroz</h2>
-                    <p>Tutor inteligente</p>
+           
+            <aside class="sidebar">
+                <button id="openGroupsModalBtn" class="sidebar-button" aria-label="Abrir modal de grupos de estudo">
+                    <i class="fas fa-hand-fist"></i> Grupos de Estudo
+                </button>
+                
+                <div class="tutor-section card">
+                    <div class="tutor-card">
+                        <img src="../images/feroz.png" alt="Feroz - Tutor inteligente" class="tutor-image" id="ferozImage" />
+                        <h2>Feroz</h2>
+                        <p>Tutor Inteligente</p>
+                    </div>
+                </div>
+
+                <!-- Seção de Acessibilidade -->
+                <div class="accessibility-section card">
+                    <h3><i class="fas fa-universal-access"></i> Acessibilidade</h3>
+                    <div class="accessibility-controls">
+                        <button id="increaseFontBtn" aria-label="Aumentar tamanho da fonte">
+                            <i class="fas fa-plus"></i> Fonte
+                        </button>
+                        <button id="decreaseFontBtn" aria-label="Diminuir tamanho da fonte">
+                            <i class="fas fa-minus"></i> Fonte
+                        </button>
+                        <button id="toggleContrastBtn" aria-label="Alternar modo de alto contraste">
+                            <i class="fas fa-adjust"></i> Contraste
+                        </button>
+                        <button id="toggleGrayscaleBtn" aria-label="Alternar modo escala de cinza">
+                            <i class="fas fa-palette"></i> Grayscale
+                        </button>
+                        <button id="toggleAudioDescriptionBtn" aria-label="Alternar descrição em áudio">
+                            <i class="fas fa-volume-up"></i> Áudio Desc.
+                        </button>
+                    </div>
                 </div>
             </aside>
-            <section class="disciplines-section">
-                <div class="disciplines-grid-container">
-                    <div class="discipline-card">
-                        <div class="discipline-icon"></div>
-                        <p>Disciplina</p>
+
+            <!-- Área de Conteúdo Principal: Progresso e Análise -->
+            <section class="content-area">
+                <!-- Seção de Progresso do Aluno -->
+                <div class="progress-section card">
+                    <h2 class="section-title"><i class="fas fa-graduation-cap"></i> Progresso do Aluno</h2>
+                    <div class="progress-list">
+                        <div class="progress-item">
+                            <div class="progress-label">Engenharia de Software I</div>
+                            <div class="progress-bar-background">
+                                <div class="progress-bar" data-progress="75" data-xp="150"></div>
+                                <div class="xp-gain-popup">+150 XP!</div>
+                            </div>
+                        </div>
+                        <div class="progress-item">
+                            <div class="progress-label">Banco de Dados</div>
+                            <div class="progress-bar-background">
+                                <div class="progress-bar" data-progress="50" data-xp="100"></div>
+                                <div class="xp-gain-popup">+100 XP!</div>
+                            </div>
+                        </div>
+                        <div class="progress-item">
+                            <div class="progress-label">Estrutura de Dados</div>
+                            <div class="progress-bar-background">
+                                <div class="progress-bar" data-progress="90" data-xp="180"></div>
+                                <div class="xp-gain-popup">+180 XP!</div>
+                            </div>
+                        </div>
+                        <div class="progress-item">
+                            <div class="progress-label">Redes de Computadores</div>
+                            <div class="progress-bar-background">
+                                <div class="progress-bar" data-progress="30" data-xp="60"></div>
+                                <div class="xp-gain-popup">+60 XP!</div>
+                            </div>
+                        </div>
+                        <div class="progress-item">
+                            <div class="progress-label">Algoritmos Avançados</div>
+                            <div class="progress-bar-background">
+                                <div class="progress-bar" data-progress="80" data-xp="160"></div>
+                                <div class="xp-gain-popup">+160 XP!</div>
+                            </div>
+                        </div>
                     </div>
-                    <div class="discipline-card">
-                        <div class="discipline-icon"></div>
-                        <p>Disciplina</p>
-                    </div>
-                    <div class="discipline-card">
-                        <div class="discipline-icon"></div>
-                        <p>Disciplina</p>
-                    </div>
-                    <div class="discipline-card">
-                        <div class="discipline-icon"></div>
-                        <p>Disciplina</p>
-                    </div>
-                    <div class="discipline-card">
-                        <div class="discipline-icon"></div>
-                        <p>Disciplina</p>
-                    </div>
-                    <div class="discipline-card">
-                        <div class="discipline-icon"></div>
-                        <p>Disciplina</p>
+                    <div class="level-info">
+                        <div class="level-circle">5</div>
+                        <p class="level-text">Nível Atual: Mestre Aprendiz</p>
                     </div>
                 </div>
-                <h2 class="disciplines-title">Disciplinas</h2>
+
+                <!-- Seção de Análise da Disciplina -->
+                <div class="analysis-section card">
+                    <h2 class="section-title"><i class="fas fa-chart-line"></i> Análise da Disciplina</h2>
+                    <div class="analysis-content">
+                        <div class="analysis-card warning">
+                            <i class="fas fa-exclamation-circle"></i>
+                            <div class="analysis-text">
+                                <h4>Atenção em Matemática Discreta!</h4>
+                                <p>Você tem <strong>2 desafios pendentes</strong>. Sugerimos revisar os tópicos de Lógica Proposicional.</p>
+                            </div>
+                        </div>
+                        <div class="analysis-card success">
+                            <i class="fas fa-check-circle"></i>
+                            <div class="analysis-text">
+                                <h4>Parabéns em Introdução à Programação!</h4>
+                                <p>Você concluiu este módulo com <strong>excelência</strong>. Continue assim!</p>
+                            </div>
+                        </div>
+                        <div class="analysis-card info">
+                            <i class="fas fa-lightbulb"></i>
+                            <div class="analysis-text">
+                                <h4>Dica para Álgebra Linear:</h4>
+                                <p>Lembre-se de revisar os conceitos de transformações lineares antes do próximo módulo. O Feroz pode ajudar!</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </section>
-
-            <!-- Início do bloco gamificação -->
-            <section class="gamification-container" aria-label="Sistema de gamificação">
-                <h2>Progresso do Aluno</h2>
-                <div class="level-circle" title="Seu nível atual">5</div>
-
-                <div>
-                    <h2>Próximos Desafios</h2>
-                    <ul class="challenge-list">
-                        <li>Resolver exercício de Matemática - Álgebra</li>
-                        <li>Estudar capítulo 4 de História - Idade Média</li>
-                        <li>Fazer quiz de Biologia - Ecossistemas</li>
-                    </ul>
-                </div>
-
-                <div>
-                    <h2>Alertas</h2>
-                    <div class="alert-box">Você tem 2 desafios pendentes!</div>
-                    <div class="alert-box">Lembre-se de revisar conteúdos atrasados.</div>
-                </div>
-            </section>
-            <!-- Fim do bloco gamificação -->
-
         </main>
 
-        <div class="chat-overlay" id="chatOverlay" style="background-color: rgba(0, 255, 0, 0.2); /* TEMPORÁRIO PARA DEBUG */">
+        <!-- Chat Overlay -->
+        <div class="chat-overlay" id="chatOverlay">
             <div class="chat-window">
                 <div class="chat-header">
                     <h3>Feroz - Tutor Inteligente</h3>
-                    <button class="close-chat-btn" id="closeChatBtn">&times;</button>
+                    <button class="close-chat-btn" id="closeChatBtn" aria-label="Fechar chat">&times;</button>
                 </div>
                 <div class="message-area" id="chatMessages">
-                    <!-- Mensagens do chat serão adicionadas aqui -->
+                    <!-- Mensagens do chat serão adicionadas aqui pelo JS -->
                 </div>
                 <form id="messageForm" class="chat-input-form">
-                    <input type="text" id="userInput" placeholder="Digite sua mensagem..." />
-                    <button type="submit" id="sendMessageBtn">
-                        Enviar
-                        <div id="loadingIndicator"></div>
-                    </button>
+                    <!-- Área de pré-visualização de upload -->
+                    <div id="fileUploadPreview" class="file-upload-preview" style="display: none;">
+                        <span id="fileNameDisplay" class="file-name-display"></span>
+                        <button id="cancelUploadBtn" class="cancel-upload-btn" aria-label="Cancelar upload de vídeo">&times;</button>
+                    </div>
+                    <div class="chat-input-row">
+                        <input type="file" id="videoUploadInput" accept="video/*" class="hidden-file-input" aria-label="Selecionar arquivo de vídeo para upload">
+                        <label for="videoUploadInput" class="upload-video-icon-btn" aria-label="Fazer upload de vídeo">
+                            <i class="fas fa-video"></i>
+                        </label>
+                        <input type="text" id="userInput" placeholder="Digite sua mensagem..." aria-label="Digite sua mensagem no chat" />
+                        <button type="submit" id="sendMessageBtn" aria-label="Enviar mensagem">
+                            Enviar
+                            <div id="loadingIndicator" role="status" aria-label="Enviando mensagem"></div>
+                        </button>
+                    </div>
                 </form>
             </div>
         </div>
-    </div>
 
-    <div id="messageContainer"></div>
+        <!-- Modal de Grupos -->
+        <div class="groups-modal-overlay" id="groupsModalOverlay">
+            <div class="groups-modal-window">
+                <div class="groups-modal-header">
+                    <h3><i class="fas fa-shield-alt"></i> Pesquisar Grupos de Estudo</h3>
+                    <button class="close-groups-modal-btn" id="closeGroupsModalBtn" aria-label="Fechar modal de grupos">&times;</button>
+                </div>
+                <div class="groups-modal-content">
+                    <input type="text" id="groupSearchInput" placeholder="Buscar grupo por nome ou disciplina..." aria-label="Campo de busca de grupos" />
+                    <div id="groupSearchResults" class="group-results-list" role="list">
+                        <!-- Exemplos de Grupos -->
+                        <div class="group-item" data-group-name="Grupo de Estudos BD I" role="listitem">
+                            <i class="fas fa-database group-icon"></i>
+                            <span class="group-name">Grupo de Estudos BD I</span>
+                            <span class="group-members"><i class="fas fa-users"></i> 15</span>
+                            <button class="join-group-btn" aria-label="Entrar no grupo: Grupo de Estudos BD I">Entrar</button>
+                        </div>
+                        <div class="group-item" data-group-name="Desafios de Programação" role="listitem">
+                            <i class="fas fa-laptop-code group-icon"></i>
+                            <span class="group-name">Desafios de Programação</span>
+                            <span class="group-members"><i class="fas fa-users"></i> 22</span>
+                            <button class="join-group-btn" aria-label="Entrar no grupo: Desafios de Programação">Entrar</button>
+                        </div>
+                        <div class="group-item" data-group-name="Algoritmos Avançados" role="listitem">
+                            <i class="fas fa-infinity group-icon"></i>
+                            <span class="group-name">Algoritmos Avançados</span>
+                            <span class="group-members"><i class="fas fa-users"></i> 8</span>
+                            <button class="join-group-btn" aria-label="Entrar no grupo: Algoritmos Avançados">Entrar</button>
+                        </div>
+                        <div class="group-item" data-group-name="Projeto Final ADS" role="listitem">
+                            <i class="fas fa-lightbulb group-icon"></i>
+                            <span class="group-name">Projeto Final ADS</span>
+                            <span class="group-members"><i class="fas fa-users"></i> 4</span>
+                            <button class="join-group-btn" aria-label="Entrar no grupo: Projeto Final ADS">Entrar</button>
+                        </div>
+                        <div class="group-item" data-group-name="Tópicos em Engenharia de Software" role="listitem">
+                            <i class="fas fa-cogs group-icon"></i>
+                            <span class="group-name">Tópicos em Engenharia de Software</span>
+                            <span class="group-members"><i class="fas fa-users"></i> 10</span>
+                            <button class="join-group-btn" aria-label="Entrar no grupo: Tópicos em Engenharia de Software">Entrar</button>
+                        </div>
+                    </div>
+                    <button class="create-group-btn" aria-label="Criar novo grupo de estudo"><i class="fas fa-plus-circle"></i> Criar Novo Grupo</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Container para mensagens temporárias (sucesso/erro) -->
+        <div id="messageContainer" role="alert" aria-live="polite"></div>
+
+        <!-- Elemento de áudio para descrições -->
+        <audio id="audioDescriptionPlayer" aria-hidden="true"></audio>
+    </div>
 
     <script src="static/script.js"></script>
 </body>
